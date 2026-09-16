@@ -27,7 +27,7 @@ It executes our synchronous code. every time a function is called it is pushed i
 This is where the async code is handeled and is passed to further callback queue or micro task queue depending on the type of async code.
 
 3: **Micro Task Queue:**
-It include Promises,fetch api having .then(), async await, Mutation observer. there result is ready just waiting for there turn to push inside call stack. It has high priority then callback queue. So first Micro task queue is executed completely and make empty then callback queue got the chance.
+It include Promise callbacks (.then(), .catch(), .finally()), fetch api having .then(),queueMicrotask(), async await, Mutation observer. there result is ready just waiting for there turn to push inside call stack. It has high priority then callback queue. So first Micro task queue is executed completely and make empty then callback queue got the chance.
 
 4: **Callback Queue:**
 Where all the callback functions and rest which are left . they are just waiting for their turn as there result is ready to run.
