@@ -24,7 +24,7 @@ Whenever a func. is invoked it will have its own seprate mini execution context 
 It executes our synchronous code. every time a function is called it is pushed inside call stack and after return it get popped off.
 
 2: **Web API / Node API:**
-This is where the async code is handeled and is passed to further callback queue or micro task queue depending on the type of async code.
+This is where the async code is handeled and is passed to further callback queue or micro task queue depending on the type of async code.It can handle multiple asynchronous operation at same time. 
 
 3: **Micro Task Queue:**
 It include Promise callbacks (.then(), .catch(), .finally()), fetch api having .then(),queueMicrotask(), async await, Mutation observer. there result is ready just waiting for there turn to push inside call stack. It has high priority then callback queue. So first Micro task queue is executed completely and make empty then callback queue got the chance.
