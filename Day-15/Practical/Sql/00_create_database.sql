@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS school_db;
+
+USE school_db;
+
+CREATE TABLE IF NOT EXISTS students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age INT,
+    city VARCHAR(100),
+    fee_paid DECIMAL(10, 2)
+);
+
+SHOW TABLES;
