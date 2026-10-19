@@ -1,0 +1,4571 @@
+{
+  "info": {
+    "name": "v1-master-enterprise-backend",
+    "description": "Comprehensive Master Collection covering all 175 endpoints with positive, negative, validation, and RBAC test cases",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 Health",
+      "item": [
+        {
+          "name": "[GET] Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Health status ok', () => pm.expect(json.data.status).to.eql('ok'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 Auth",
+      "item": [
+        {
+          "name": "[POST] Super Admin Login (Negative - Wrong Password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"WrongPassword999!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Super Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminAccessToken', json.data.accessToken);",
+                  "pm.environment.set('adminRefreshToken', json.data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Admin Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Actor type is super_admin', () => pm.expect(json.data.type).to.eql('super_admin'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Admin Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"System Super Administrator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminAccessToken', json.data.accessToken);",
+                  "pm.environment.set('adminRefreshToken', json.data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/refresh-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 User Management",
+      "item": [
+        {
+          "name": "[GET] List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/user-management/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "user-management",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Subadmin Management",
+      "item": [
+        {
+          "name": "[GET] List Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has permissions array', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('testRoleId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inventory Manager {{$timestamp}}\",\n  \"description\": \"Can manage inventory and orders\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Subadmin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('createdSubadminId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Staff John\",\n  \"email\": \"subadmin_{{$timestamp}}@example.com\",\n  \"phone\": \"+919876543210\",\n  \"password\": \"SubadminPass123!\",\n  \"roleId\": \"{{testRoleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Subadmins",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Subadmin Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins/{{createdSubadminId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins",
+                "{{createdSubadminId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Inventory",
+      "item": [
+        {
+          "name": "[POST] Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminCategoryId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics {{$timestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories/{{adminCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories",
+                "{{adminCategoryId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Consumer Electronics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories/{{adminCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories",
+                "{{adminCategoryId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminProductId', json.data.id);",
+                  "pm.environment.set('adminVariantId', json.data.variants[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{adminCategoryId}}\",\n  \"name\": \"Smart Watch {{$timestamp}}\",\n  \"description\": \"High quality smartwatch\",\n  \"basePrice\": 999900,\n  \"variants\": [\n    {\n      \"sku\": \"SW-BLK-{{$timestamp}}\",\n      \"attributes\": {\n        \"color\": \"Black\"\n      },\n      \"price\": 999900,\n      \"stock\": 25,\n      \"lowStockThreshold\": 5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products/{{adminProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products",
+                "{{adminProductId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated smartwatch description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products/{{adminProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products",
+                "{{adminProductId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Add Variant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminVariant2Id', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SW-SLV-{{$timestamp}}\",\n  \"attributes\": {\n    \"color\": \"Silver\"\n  },\n  \"price\": 1049900,\n  \"stock\": 15,\n  \"lowStockThreshold\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products/{{adminProductId}}/variants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products",
+                "{{adminProductId}}",
+                "variants"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Variant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1099900\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products/{{adminProductId}}/variants/{{adminVariant2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products",
+                "{{adminProductId}}",
+                "variants",
+                "{{adminVariant2Id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Adjust Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": \"{{adminVariantId}}\",\n  \"quantityChange\": 10,\n  \"note\": \"New shipment arrived\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/stock/adjust",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "stock",
+                "adjust"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Stock Movements",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/stock/movements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "stock",
+                "movements"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Low Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/stock/low",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "stock",
+                "low"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Low Stock Threshold",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lowStockThreshold\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/stock/variants/{{adminVariantId}}/threshold",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "stock",
+                "variants",
+                "{{adminVariantId}}",
+                "threshold"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Coupons & Orders",
+      "item": [
+        {
+          "name": "[POST] Create Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminCouponId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SALE{{$timestamp}}\",\n  \"description\": \"10% festive discount\",\n  \"discountType\": \"percent\",\n  \"discountValue\": 10,\n  \"minOrderAmount\": 100000,\n  \"maxDiscountAmount\": 50000,\n  \"usageLimit\": 100,\n  \"perUserLimit\": 2,\n  \"startsAt\": \"2026-10-15T16:42:36.980Z\",\n  \"expiresAt\": \"2026-11-14T17:42:36.981Z\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/coupons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Coupons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/coupons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/coupons/{{adminCouponId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "coupons",
+                "{{adminCouponId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated coupon description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/coupons/{{adminCouponId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "coupons",
+                "{{adminCouponId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Wallets & Transactions",
+      "item": [
+        {
+          "name": "[GET] List Wallets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/wallets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "wallets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Invoices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "invoices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Sales Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/sales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports",
+                "sales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Wallet Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports",
+                "wallet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Transaction Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports",
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 Notifications & Help & Settings & FAQ",
+      "item": [
+        {
+          "name": "[GET] List Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Send Broadcast Notification",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Update Notice\",\n  \"body\": \"Scheduled maintenance will occur tonight at 2 AM.\",\n  \"audience\": \"users\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/broadcast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "notifications",
+                "broadcast"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Mark All Notifications As Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Help Tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/help/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "help",
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Setting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": [\n    {\n      \"key\": \"site.name\",\n      \"value\": \"RBAC Store Premier\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List FAQ Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/faq/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "faq",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List FAQs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/faq",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "faq"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Audit Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "audit-logs"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 User Auth & Profile",
+      "item": [
+        {
+          "name": "[POST] Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "const access = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "const refresh = (json.data && json.data.tokens) ? json.data.tokens.refreshToken : (json.data ? json.data.refreshToken : null);",
+                  "pm.environment.set('userAccessToken', access);",
+                  "pm.environment.set('userRefreshToken', refresh);",
+                  "if (json.data && json.data.devToken) pm.environment.set('userVerifyToken', json.data.devToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Alice Cooper\",\n  \"email\": \"alice_{{$timestamp}}@example.com\",\n  \"phone\": \"+919123456789\",\n  \"password\": \"UserPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{userVerifyToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/auth/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('User is email verified', () => pm.expect(json.data.isEmailVerified).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Alice C. Cooper\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Add Address",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userAddressId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Home\",\n  \"recipientName\": \"Alice Cooper\",\n  \"phone\": \"+919123456789\",\n  \"line1\": \"123 Baker Street\",\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"isDefault\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile",
+                "addresses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Addresses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/user/profile/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile",
+                "addresses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Catalog & Public",
+      "item": [
+        {
+          "name": "[GET] Public Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Single Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('In stock is boolean', () => pm.expect(json.data.variants[0].inStock).to.be.a('boolean'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products/{{userTestProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "products",
+                "{{userTestProductId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public FAQ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/faq",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faq"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/settings/public",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "public"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Wallet",
+      "item": [
+        {
+          "name": "[GET] Get Wallet Balance (Zero Initially)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Balance exists', () => pm.expect(json.data.balance).to.eql(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Top Up Wallet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Balance updated', () => pm.expect(json.data.wallet.balance).to.eql(500000));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/wallet/top-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "top-up"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Wallet Entries",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/wallet/entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "entries"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Cart & Coupon",
+      "item": [
+        {
+          "name": "[GET] Get Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Add Cart Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": \"{{userTestVariantId}}\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Available Coupons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/coupons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Apply Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{userTestCouponCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coupons",
+                "apply"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Orders & Checkout",
+      "item": [
+        {
+          "name": "[POST] Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userPlacedOrderId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": \"{{userAddressId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List My Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get My Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{userPlacedOrderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{userPlacedOrderId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Cancel Order (Self Refund)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Order status is cancelled', () => pm.expect(json.data.status).to.eql('cancelled'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{userPlacedOrderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{userPlacedOrderId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Invoices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Notifications & Help Tickets",
+      "item": [
+        {
+          "name": "[GET] My Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Unread Notification Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Mark All Notifications Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Support Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userHelpTicketId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Question about shipping speed\",\n  \"message\": \"How long does standard delivery take?\",\n  \"priority\": \"medium\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List My Tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get My Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Reply To Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Adding more details to my inquiry.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}/replies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}",
+                "replies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Close Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Ticket status is closed', () => pm.expect(json.data.status).to.eql('closed'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}",
+                "close"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "00 Bootstrap Subadmin",
+      "item": [
+        {
+          "name": "[POST] Super Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const token = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "pm.environment.set('rbacAdminToken', token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Subadmin With No Initial Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('testSubadminEmail', json.data.email);",
+                  "pm.environment.set('testSubadminId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Restricted Officer\",\n  \"email\": \"officer_{{$timestamp}}@example.com\",\n  \"phone\": \"+919876500000\",\n  \"password\": \"OfficerPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Subadmin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const access = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "const refresh = (json.data && json.data.tokens) ? json.data.tokens.refreshToken : (json.data ? json.data.refreshToken : null);",
+                  "pm.environment.set('subadminAccessToken', access);",
+                  "pm.environment.set('subadminRefreshToken', refresh);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testSubadminEmail}}\",\n  \"password\": \"OfficerPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 Negative RBAC - 403 on Orders",
+      "item": [
+        {
+          "name": "[GET] Access Orders With No Permission -> Expect 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Dynamic Role Grant & Positive Verification",
+      "item": [
+        {
+          "name": "[GET] Find orders:view Permission ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const perm = json.data.find(p => p.module && p.module.key === 'orders' && p.action === 'view');",
+                  "pm.expect(perm).to.not.be.undefined;",
+                  "pm.environment.set('ordersViewPermId', perm.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Role With orders:view",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('orderViewerRoleId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Order Viewer {{$timestamp}}\",\n  \"description\": \"Can view orders\",\n  \"permissionIds\": [\n    \"{{ordersViewPermId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Assign Order Viewer Role to Subadmin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"{{orderViewerRoleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins/{{testSubadminId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins",
+                "{{testSubadminId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Access Orders -> Expect 200 Now",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK after role grant', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Direct Deny Override (Deny Always Wins)",
+      "item": [
+        {
+          "name": "[PATCH] Apply Direct Deny Override for orders:view",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissions\": [\n    {\n      \"permissionId\": \"{{ordersViewPermId}}\",\n      \"effect\": \"deny\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins/{{testSubadminId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins",
+                "{{testSubadminId}}",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Access Orders -> Expect 403 (Deny Wins)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden because direct deny overrides role', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Profile & Session",
+      "item": [
+        {
+          "name": "[GET] Subadmin Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Actor type is subadmin', () => pm.expect(json.data.type).to.eql('subadmin'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Effective Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/profile/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "profile",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Subadmin Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{subadminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 Security & Negative Test Cases",
+      "item": [
+        {
+          "name": "[GET] Unauthorized Access Without Token (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                  "const json = pm.response.json();",
+                  "pm.test('Success is false', () => pm.expect(json.success).to.be.false);",
+                  "pm.test('Error code is UNAUTHORIZED', () => pm.expect(json.code).to.eql('UNAUTHORIZED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Cross-Actor Token Rejection (User token on Admin route -> Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403', () => pm.response.to.have.status(403));",
+                  "const json = pm.response.json();",
+                  "pm.test('Success is false', () => pm.expect(json.success).to.be.false);",
+                  "pm.test('Error code is FORBIDDEN', () => pm.expect(json.code).to.eql('FORBIDDEN'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Invalid Schema Validation (Expect 422 with Zod field errors)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 422', () => pm.response.to.have.status(422));",
+                  "const json = pm.response.json();",
+                  "pm.test('Validation error code returned', () => pm.expect(json.code).to.eql('VALIDATION_ERROR'));",
+                  "pm.test('Errors array populated', () => pm.expect(json.errors.length).to.be.greaterThan(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Non-Existent Resource (Expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));",
+                  "const json = pm.response.json();",
+                  "pm.test('Error code is NOT_FOUND', () => pm.expect(json.code).to.eql('NOT_FOUND'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] User Registration Duplicate Email (Negative - Expect 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));",
+                  "const json = pm.response.json();",
+                  "pm.test('Conflict code or message returned', () => pm.expect(json.success).to.be.false);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\":\"Duplicate User\",\"email\":\"testuser_e2e@example.com\",\"phone\":\"+1234567890\",\"password\":\"UserPassword123!\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

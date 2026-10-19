@@ -1,0 +1,1686 @@
+{
+  "info": {
+    "name": "v1-user",
+    "description": "Full customer lifecycle test collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 Bootstrap Fixtures",
+      "item": [
+        {
+          "name": "[POST] Super Admin Login For Bootstrap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const token = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "pm.environment.set('bootstrapAdminToken', token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Catalog Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userTestCatId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bootstrapAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Apparel {{$timestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Catalog Product with Variant Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userTestProductId', json.data.id);",
+                  "pm.environment.set('userTestVariantId', json.data.variants[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bootstrapAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{userTestCatId}}\",\n  \"name\": \"Cotton Hoodie {{$timestamp}}\",\n  \"description\": \"Comfortable fleece hoodie\",\n  \"basePrice\": 150000,\n  \"variants\": [\n    {\n      \"sku\": \"HD-BLK-{{$timestamp}}\",\n      \"attributes\": {\n        \"size\": \"L\",\n        \"color\": \"Black\"\n      },\n      \"price\": 150000,\n      \"stock\": 100,\n      \"lowStockThreshold\": 5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/inventory/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "inventory",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create User Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userTestCouponCode', json.data.code);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bootstrapAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WELCOME{{$timestamp}}\",\n  \"description\": \"Flat 200 off\",\n  \"discountType\": \"fixed\",\n  \"discountValue\": 20000,\n  \"minOrderAmount\": 50000,\n  \"usageLimit\": 50,\n  \"perUserLimit\": 1,\n  \"startsAt\": \"2026-10-15T16:42:36.981Z\",\n  \"expiresAt\": \"2026-11-14T17:42:36.981Z\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/coupons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 User Auth & Profile",
+      "item": [
+        {
+          "name": "[POST] Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "const access = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "const refresh = (json.data && json.data.tokens) ? json.data.tokens.refreshToken : (json.data ? json.data.refreshToken : null);",
+                  "pm.environment.set('userAccessToken', access);",
+                  "pm.environment.set('userRefreshToken', refresh);",
+                  "if (json.data && json.data.devToken) pm.environment.set('userVerifyToken', json.data.devToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Alice Cooper\",\n  \"email\": \"alice_{{$timestamp}}@example.com\",\n  \"phone\": \"+919123456789\",\n  \"password\": \"UserPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{userVerifyToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/auth/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('User is email verified', () => pm.expect(json.data.isEmailVerified).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Alice C. Cooper\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Add Address",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userAddressId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Home\",\n  \"recipientName\": \"Alice Cooper\",\n  \"phone\": \"+919123456789\",\n  \"line1\": \"123 Baker Street\",\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"postalCode\": \"560001\",\n  \"country\": \"India\",\n  \"isDefault\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile",
+                "addresses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Addresses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/user/profile/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile",
+                "addresses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Catalog & Public",
+      "item": [
+        {
+          "name": "[GET] Public Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Single Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('In stock is boolean', () => pm.expect(json.data.variants[0].inStock).to.be.a('boolean'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products/{{userTestProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "products",
+                "{{userTestProductId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public FAQ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/faq",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faq"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Public Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/settings/public",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "public"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Wallet",
+      "item": [
+        {
+          "name": "[GET] Get Wallet Balance (Zero Initially)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Balance exists', () => pm.expect(json.data.balance).to.eql(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Top Up Wallet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Balance updated', () => pm.expect(json.data.wallet.balance).to.eql(500000));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/wallet/top-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "top-up"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Wallet Entries",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/wallet/entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "entries"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Cart & Coupon",
+      "item": [
+        {
+          "name": "[GET] Get Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Add Cart Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": \"{{userTestVariantId}}\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Available Coupons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/coupons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Apply Coupon",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{userTestCouponCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coupons",
+                "apply"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Orders & Checkout",
+      "item": [
+        {
+          "name": "[POST] Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userPlacedOrderId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": \"{{userAddressId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List My Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get My Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{userPlacedOrderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{userPlacedOrderId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Cancel Order (Self Refund)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Order status is cancelled', () => pm.expect(json.data.status).to.eql('cancelled'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{userPlacedOrderId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{userPlacedOrderId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Invoices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Notifications & Help Tickets",
+      "item": [
+        {
+          "name": "[GET] My Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Unread Notification Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Mark All Notifications Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Support Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userHelpTicketId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Question about shipping speed\",\n  \"message\": \"How long does standard delivery take?\",\n  \"priority\": \"medium\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] List My Tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Get My Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Reply To Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Adding more details to my inquiry.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}/replies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}",
+                "replies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Close Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Ticket status is closed', () => pm.expect(json.data.status).to.eql('closed'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/help/tickets/{{userHelpTicketId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "help",
+                "tickets",
+                "{{userHelpTicketId}}",
+                "close"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

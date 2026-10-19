@@ -1,0 +1,668 @@
+{
+  "info": {
+    "name": "v1-subadmin",
+    "description": "Subadmin and dynamic RBAC test collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 Bootstrap Subadmin",
+      "item": [
+        {
+          "name": "[POST] Super Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const token = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "pm.environment.set('rbacAdminToken', token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Subadmin With No Initial Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('testSubadminEmail', json.data.email);",
+                  "pm.environment.set('testSubadminId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Restricted Officer\",\n  \"email\": \"officer_{{$timestamp}}@example.com\",\n  \"phone\": \"+919876500000\",\n  \"password\": \"OfficerPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Subadmin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const access = (json.data && json.data.tokens) ? json.data.tokens.accessToken : (json.data ? json.data.accessToken : null);",
+                  "const refresh = (json.data && json.data.tokens) ? json.data.tokens.refreshToken : (json.data ? json.data.refreshToken : null);",
+                  "pm.environment.set('subadminAccessToken', access);",
+                  "pm.environment.set('subadminRefreshToken', refresh);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testSubadminEmail}}\",\n  \"password\": \"OfficerPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 Negative RBAC - 403 on Orders",
+      "item": [
+        {
+          "name": "[GET] Access Orders With No Permission -> Expect 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Dynamic Role Grant & Positive Verification",
+      "item": [
+        {
+          "name": "[GET] Find orders:view Permission ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const perm = json.data.find(p => p.module && p.module.key === 'orders' && p.action === 'view');",
+                  "pm.expect(perm).to.not.be.undefined;",
+                  "pm.environment.set('ordersViewPermId', perm.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Create Role With orders:view",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('orderViewerRoleId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Order Viewer {{$timestamp}}\",\n  \"description\": \"Can view orders\",\n  \"permissionIds\": [\n    \"{{ordersViewPermId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[PATCH] Assign Order Viewer Role to Subadmin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"{{orderViewerRoleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins/{{testSubadminId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins",
+                "{{testSubadminId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Access Orders -> Expect 200 Now",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK after role grant', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Direct Deny Override (Deny Always Wins)",
+      "item": [
+        {
+          "name": "[PATCH] Apply Direct Deny Override for orders:view",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{rbacAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissions\": [\n    {\n      \"permissionId\": \"{{ordersViewPermId}}\",\n      \"effect\": \"deny\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/subadmin-management/subadmins/{{testSubadminId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "subadmin-management",
+                "subadmins",
+                "{{testSubadminId}}",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Access Orders -> Expect 403 (Deny Wins)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden because direct deny overrides role', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/admin/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Profile & Session",
+      "item": [
+        {
+          "name": "[GET] Subadmin Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Actor type is subadmin', () => pm.expect(json.data.type).to.eql('subadmin'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Subadmin Effective Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              }
+            ],
+            "body": null,
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/profile/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "profile",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Subadmin Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{subadminAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{subadminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subadmin/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subadmin",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

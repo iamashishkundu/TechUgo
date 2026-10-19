@@ -1,0 +1,37 @@
+const ERROR_CODES = {
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  ACCOUNT_BLOCKED: 'ACCOUNT_BLOCKED',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  REGISTRATION_DISABLED: 'REGISTRATION_DISABLED',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  ROUTE_NOT_FOUND: 'ROUTE_NOT_FOUND',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INSUFFICIENT_STOCK: 'INSUFFICIENT_STOCK',
+  INSUFFICIENT_WALLET_BALANCE: 'INSUFFICIENT_WALLET_BALANCE',
+  INVALID_COUPON: 'INVALID_COUPON',
+  INVALID_STATUS_TRANSITION: 'INVALID_STATUS_TRANSITION',
+  MAINTENANCE_MODE: 'MAINTENANCE_MODE',
+  CONFLICT: 'CONFLICT',
+  NOT_FOUND: 'NOT_FOUND',
+  BAD_REQUEST: 'BAD_REQUEST',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED'
+};
+
+const MESSAGES = {
+  INVALID_CREDENTIALS: 'Invalid credentials',
+  ACCOUNT_BLOCKED: 'Your account has been blocked',
+  EMAIL_NOT_VERIFIED: 'Please verify your email address to continue',
+  REGISTRATION_DISABLED: 'Public registration is currently disabled',
+  UNAUTHORIZED: 'Authentication required to access this resource',
+  FORBIDDEN: 'You do not have permission to perform this action',
+  ROUTE_NOT_FOUND: 'The requested route does not exist',
+  MAINTENANCE_MODE: 'Service is currently under maintenance. Please try again later.',
+  INTERNAL_SERVER_ERROR: 'Internal server error occurred'
+};
+
+module.exports = {
+  ERROR_CODES,
+  MESSAGES
+};

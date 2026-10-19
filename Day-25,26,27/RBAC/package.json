@@ -1,0 +1,47 @@
+{
+  "name": "rbac-backend",
+  "version": "1.0.0",
+  "description": "Role-Based Admin Backend (Node.js, Express, PostgreSQL, Sequelize)",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:reset": "npm run db:migrate:undo:all && npm run db:migrate && npm run db:seed",
+    "test:postman": "newman run postman/collections/v1-admin.postman_collection.json -e postman/environments/local.postman_environment.json --bail && newman run postman/collections/v1-user.postman_collection.json -e postman/environments/local.postman_environment.json --bail && newman run postman/collections/v1-subadmin.postman_collection.json -e postman/environments/local.postman_environment.json --bail"
+  },
+  "_moduleAliases": {
+    "@config": "src/config",
+    "@constants": "src/constants",
+    "@db": "src/database",
+    "@middlewares": "src/middlewares",
+    "@services": "src/services",
+    "@utils": "src/utils",
+    "@v1": "src/api/v1"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "otplib": "^12.0.1",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.5",
+    "winston": "^3.17.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "nodemon": "^3.1.9",
+    "sequelize-cli": "^6.6.2"
+  }
+}

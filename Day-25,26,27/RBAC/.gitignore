@@ -1,0 +1,10 @@
+node_modules/
+.env
+logs/*
+!logs/.gitkeep
+uploads/profiles/*
+!uploads/profiles/.gitkeep
+uploads/products/*
+!uploads/products/.gitkeep
+uploads/tickets/*
+!uploads/tickets/.gitkeep
