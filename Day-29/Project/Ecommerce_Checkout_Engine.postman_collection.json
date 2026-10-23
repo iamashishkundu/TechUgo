@@ -1,0 +1,739 @@
+{
+  "info": {
+    "_postman_id": "a9e14512-6804-4c4d-91b3-460bfa6f1122",
+    "name": "E-Commerce Checkout & Order Engine (ACID Transactions)",
+    "description": "Comprehensive Postman test suite covering all routes, success paths, ACID rollbacks, inventory concurrency protections, state machine transitions, and validation edge cases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "11111111-1111-4111-8111-111111111111",
+      "type": "string"
+    },
+    {
+      "key": "inStockProductId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "type": "string"
+    },
+    {
+      "key": "limitedStockProductId",
+      "value": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "type": "string"
+    },
+    {
+      "key": "singleStockProductId",
+      "value": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "type": "string"
+    },
+    {
+      "key": "outOfStockProductId",
+      "value": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "type": "string"
+    },
+    {
+      "key": "inactiveProductId",
+      "value": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Server Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Service status is UP', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.status).to.eql('UP');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Products Module",
+      "item": [
+        {
+          "name": "Get All Active Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns active products array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.be.true;",
+                  "    pm.expect(res.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Products (Including Inactive)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products?includeInactive=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products"],
+              "query": [
+                {
+                  "key": "includeInactive",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Includes inactive products', () => {",
+                  "    const res = pm.response.json();",
+                  "    const hasInactive = res.data.some(p => p.isActive === false);",
+                  "    pm.expect(hasInactive).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product By ID (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{inStockProductId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "{{inStockProductId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns correct product record', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data.id).to.eql(pm.collectionVariables.get('inStockProductId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product By ID (Not Found -> 404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "00000000-0000-0000-0000-000000000000"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Error code is NOT_FOUND', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Users Module",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Users list returned', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User By ID (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns matching user', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data.id).to.eql(pm.collectionVariables.get('userId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User By ID (Not Found -> 404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "00000000-0000-0000-0000-000000000000"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Error code is NOT_FOUND', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Checkout Engine (ACID Transactions)",
+      "item": [
+        {
+          "name": "1. Successful Checkout (Saves orderId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 2\n    },\n    {\n      \"productId\": \"{{limitedStockProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', () => pm.response.to.have.status(201));",
+                  "const res = pm.response.json();",
+                  "pm.test('Order created with items & total', () => {",
+                  "    pm.expect(res.success).to.be.true;",
+                  "    pm.expect(res.data.orderId).to.be.a('string');",
+                  "    pm.expect(res.data.status).to.eql('PENDING');",
+                  "    pm.expect(res.data.items.length).to.eql(2);",
+                  "    pm.expect(res.data.items[0].title).to.be.a('string');",
+                  "});",
+                  "// Auto-save generated orderId for subsequent Orders module tests",
+                  "pm.collectionVariables.set('orderId', res.data.orderId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Insufficient Stock (Rollback Test -> 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 1\n    },\n    {\n      \"productId\": \"{{outOfStockProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Error code is INSUFFICIENT_STOCK', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('INSUFFICIENT_STOCK');",
+                  "    pm.expect(res.message).to.include('Insufficient stock');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Checkout Inactive Product (Rejection -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{inactiveProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Reports inactive product', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('inactive');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Checkout Non-Existent Product (-> 404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"99999999-9999-4999-8999-999999999999\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('Reports missing product', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Checkout Non-Existent User (-> 404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"99999999-9999-4999-8999-999999999999\",\n  \"items\": [\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('Reports missing user', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Validation: Invalid Quantity (<= 0 -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Error message mentions quantity > 0', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('greater than 0');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Validation: Duplicate Product IDs in Payload (-> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 1\n    },\n    {\n      \"productId\": \"{{inStockProductId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Detects duplicate product id', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('Duplicate productId');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Concurrency Test Item Purchase (Buy Last Stock = 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{singleStockProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "checkout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// First purchase consumes stock 1 -> 0 (201 Created)",
+                  "// Immediate repeat purchase returns 409 Conflict (Insufficent Stock)",
+                  "pm.test('Handled with expected status (201 on first run, 409 on subsequent run)', () => {",
+                  "    pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Orders & Restocking Lifecycle",
+      "item": [
+        {
+          "name": "Get Order By ID (Using saved {{orderId}})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "orders", "{{orderId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Order contains line items and customer info', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data.id).to.eql(pm.collectionVariables.get('orderId'));",
+                  "    pm.expect(res.data.items).to.be.an('array');",
+                  "    pm.expect(res.data.user).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Orders By User ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "orders", "user", "{{userId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns list of orders for customer', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order & Restock Inventory (ACID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "orders", "{{orderId}}", "cancel"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Order status changed to CANCELLED', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.data.status).to.eql('CANCELLED');",
+                  "    pm.expect(res.message).to.include('restocked');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel Already Cancelled Order (Rejection -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "orders", "{{orderId}}", "cancel"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Error message notes order already cancelled', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('already cancelled');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Error Handling & Edge Cases",
+      "item": [
+        {
+          "name": "Non-Existent Route (404 Fallback)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/non-existent-endpoint",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "non-existent-endpoint"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('Returns standard not found message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.error).to.eql('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
